@@ -12,6 +12,7 @@ import { MeetingModule } from './meeting/meeting.module';
 import { AssesmentModule } from './assesment/assesment.module';
 import { ProfileModule } from './profile/profile.module';
 import { JawabanModule } from './jawaban/jawaban.module';
+import { TopicModule } from './topic/topic.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { JawabanModule } from './jawaban/jawaban.module';
     AssesmentModule,
     ProfileModule,
     JawabanModule,
+    TopicModule,
   ],
   controllers: [AppController],
   providers: [AppService],

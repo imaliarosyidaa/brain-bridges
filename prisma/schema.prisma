@@ -1,0 +1,155 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") // Update `.env` file with PostgreSQL connection string
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Define enum for Role
+enum Role {
+  SISWA
+  PENGAJAR
+  ADMIN
+}
+
+// Define model for User
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  password     String?
+  first_name   String?
+  last_name    String?
+  phone_number String?
+  description  String?
+  photo        String?
+  role         Role     @default(SISWA)
+  createdAt    DateTime @default(now())
+  refreshToken String?
+
+  pengajaran Class[]     @relation("PengajarClasses")
+  kelas      Class[]     @relation("SiswaClasses")
+  KelasSiswa KelasSiswa[]
+
+  // Relasi dengan SiswaClasses
+  SiswaClasses SiswaClasses[]
+
+  @@map("users")
+}
+
+// Define model for Class
+model Class {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  pengajar_id Int?
+  topic_id    Int
+  pengajar    User?    @relation("PengajarClasses", fields: [pengajar_id], references: [id])
+  topic       Topic    @relation("ClassTopic", fields: [topic_id], references: [id])
+
+  siswa       User[]   @relation("SiswaClasses") // Inverse relation to SiswaClasses
+  meetings    Meeting[]
+  assesments  Assesment[]
+  KelasSiswa  KelasSiswa[]
+
+  // Relasi dengan SiswaClasses
+  SiswaClasses SiswaClasses[]
+
+  @@map("classes")
+}
+
+// Define model for Topic
+model Topic {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  kelas Class[] @relation("ClassTopic")
+
+  @@map("topics")
+}
+
+// Define model for Meeting
+model Meeting {
+  id           Int     @id @default(autoincrement())
+  kelas_id     Int
+  tittle       String
+  description  String
+  vidio1       String
+  title_vid1   String
+  vidio2       String?
+  title_vid2   String?
+  vidio3       String?
+  title_vid3   String?
+  file_materi1 String
+  file_materi2 String?
+  file_materi3 String?
+
+  kelas        Class   @relation(fields: [kelas_id], references: [id])
+
+  @@map("meetings")
+}
+
+// Define model for KelasSiswa
+model KelasSiswa {
+  id       Int @id @default(autoincrement())
+  kelas_id Int
+  user_id  Int
+
+  kelas Class @relation(fields: [kelas_id], references: [id])
+  siswa User  @relation(fields: [user_id], references: [id])
+
+  @@map("kelas_siswa")
+}
+
+// Define model for Assesment
+model Assesment {
+  id          Int      @id @default(autoincrement())
+  kelas_id    Int
+  title       String
+  deadline    DateTime
+  description String
+  file1       String?
+  file2       String?
+  file3       String?
+
+  kelas   Class     @relation(fields: [kelas_id], references: [id])
+  Jawaban Jawaban[]
+
+  @@map("assesments")
+}
+
+// Define model for Book
+model Book {
+  id          Int    @id @default(autoincrement())
+  title       String
+  description String
+  cover       String
+  file        String
+
+  @@map("books")
+}
+
+// Define model for Jawaban
+model Jawaban {
+  id           Int     @id @default(autoincrement())
+  assesment_id Int
+  jawaban      String?
+  file         String?
+  nilai        Int?
+
+  assesments Assesment @relation(fields: [assesment_id], references: [id])
+
+  @@map("jawaban")
+}
+
+// Define intermediate table for SiswaClasses relation
+model SiswaClasses {
+  A Int
+  B Int
+
+  A_fkey Class @relation(fields: [A], references: [id])
+  B_fkey User  @relation(fields: [B], references: [id])
+
+  @@id([A, B])
+  @@map("SiswaClasses")
+}

@@ -39,4 +39,9 @@ export class AuthController {
   getProfile(@Req() req) {
     return req.user; // Returns user info from JWT token
   }
+
+  @Post('refresh-token')
+  async refreshToken(@Body('refreshToken') refreshToken: string) {
+    return this.authService.refreshToken(refreshToken);
+  }
 }

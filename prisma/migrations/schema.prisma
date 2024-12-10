@@ -26,6 +26,7 @@
     photo        String?
     role         Role     @default(SISWA)
     createdAt    DateTime @default(now())
+    refreshToken String?
 
     pengajaran Class[]     @relation("PengajarClasses")
     kelas      Class[]     @relation("SiswaClasses")
