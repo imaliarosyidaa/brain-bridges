@@ -1,10 +1,6 @@
 import { IsString, IsOptional, IsNumber } from 'class-validator';
 
 export class UpdateJawabanDto {
-  @IsString() // Menerima asesmentId dalam bentuk string
-  @IsOptional()
-  assesmentId?: string;
-
   @IsString()
   @IsOptional()
   jawaban?: string;

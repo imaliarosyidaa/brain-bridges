@@ -1,10 +1,19 @@
-import { Controller, Post, Body, Get, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Req,
+  UseGuards,
+  Res,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { AuthGuard } from '@nestjs/passport';
+import { Response } from 'express';
 
 @Controller('/api/auth')
 export class AuthController {
@@ -28,10 +37,24 @@ export class AuthController {
   }
 
   @Get('google/redirect')
-  @UseGuards(GoogleAuthGuard) // Use GoogleAuthGuard to protect callback
-  async googleLoginCallback(@Req() req) {
-    const profile = req.user;
-    return this.authService.loginWithGoogle(profile);
+  @UseGuards(GoogleAuthGuard)
+  async googleLoginCallback(@Req() req, @Res() res: Response) {
+    try {
+      const user = req.user; // This should contain user info from Google
+      const tokens = await this.authService.loginWithGoogle(user);
+
+      // Construct the frontend callback URL with tokens as query parameters
+      const frontendUrl = 'http://localhost:3001/google-callback';
+      const redirectUrl = `${frontendUrl}?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}&email=${encodeURIComponent(
+        tokens.email,
+      )}&name=${encodeURIComponent(tokens.name)}&role=${tokens.role}`;
+
+      // Redirect the user to the frontend with the tokens
+      res.redirect(redirectUrl);
+    } catch (error) {
+      console.error('Error during Google OAuth callback:', error);
+      res.redirect('http://localhost:3001/login'); // Redirect to login on error
+    }
   }
 
   @Get('profile')

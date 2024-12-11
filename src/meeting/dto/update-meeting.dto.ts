@@ -27,4 +27,7 @@ export class UpdateMeetingDto {
 
   @IsOptional()
   file_materi3?: string; // URL file materi 3, jika ada perubahan
+
+  @IsOptional()
+  summary?: string;
 }

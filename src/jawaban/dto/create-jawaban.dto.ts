@@ -1,16 +1,12 @@
-import { IsString, IsOptional, IsNumber } from 'class-validator';
+import { IsString, IsOptional, IsNotEmpty } from 'class-validator';
 
 export class CreateJawabanDto {
-  @IsString() // Menerima asesmentId dalam bentuk string
+  @IsNotEmpty() // Menerima asesmentId dalam bentuk string
   assesmentId: string;
 
   @IsString()
   @IsOptional()
   jawaban?: string;
-
-  @IsNumber()
-  @IsOptional()
-  nilai?: number;
 
   @IsString()
   @IsOptional()

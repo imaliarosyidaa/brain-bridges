@@ -1,160 +1,221 @@
+// src/jawaban/jawaban.controller.ts
 import {
   Body,
   Controller,
-  Post,
-  UseGuards,
-  UploadedFile,
-  UseInterceptors,
-  Req,
+  Delete,
+  Get,
+  Logger,
   Param,
+  Post,
   Put,
+  Query,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+  BadRequestException,
+  Req,
+  ParseIntPipe,
+  Patch,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { CreateJawabanDto } from './dto/create-jawaban.dto';
-import { JawabanService } from './jawaban.service';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
-import * as path from 'path';
-import * as fs from 'fs';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorator/roles.decorator';
+import { Role } from 'src/auth/enum/role.enum';
+import { JawabanService } from './jawaban.service';
+import { CreateJawabanDto } from './dto/create-jawaban.dto';
 import { UpdateJawabanDto } from './dto/update-jawaban.dto';
+import { AssignNilaiDto } from './dto/assign-nilai.dto';
 
-@Controller('jawaban')
+@Controller('api/jawaban')
 export class JawabanController {
+  private readonly logger = new Logger(JawabanController.name);
+
   constructor(private readonly jawabanService: JawabanService) {}
 
-  // CREATE Jawaban
-  @Post('create')
-  @UseGuards(JwtAuthGuard)
+  // GET All Jawaban
+  @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Siswa)
+  async getAllJawaban(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+    @Query('search') search: string = '',
+  ) {
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+
+    if (isNaN(pageNumber) || isNaN(limitNumber)) {
+      throw new BadRequestException('Page and limit must be numbers');
+    }
+
+    return this.jawabanService.getAllJawaban(pageNumber, limitNumber, search);
+  }
+
+  // GET Jawaban by ID
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Siswa)
+  async getJawabanById(@Param('id') id: string) {
+    const jawabanId = parseInt(id, 10);
+    if (isNaN(jawabanId)) {
+      throw new BadRequestException('ID must be a number');
+    }
+    this.logger.log(`Getting Jawaban by id: ${jawabanId}`);
+    return await this.jawabanService.getJawabanById(jawabanId);
+  }
+
+  // POST Create Jawaban
+  @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Siswa)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: './uploads/jawaban',
+        destination: './uploads/file/jawaban',
         filename: (req, file, cb) => {
           const filename = `${uuidv4()}-${file.originalname}`;
           cb(null, filename);
         },
       }),
+      fileFilter: (req, file, cb) => {
+        if (file.fieldname === 'file') {
+          if (
+            file.mimetype !== 'application/pdf' &&
+            file.mimetype !== 'image/png' &&
+            file.mimetype !== 'image/jpeg'
+          ) {
+            return cb(
+              new Error(
+                'Only PDF, PNG, and JPEG files are allowed for Jawaban.',
+              ),
+              false,
+            );
+          }
+        }
+        cb(null, true); // accept the file
+      },
     }),
   )
   async createJawaban(
-    @Req() req,
     @Body() createJawabanDto: CreateJawabanDto,
     @UploadedFile() file: Express.Multer.File,
+    @Req() req: any,
   ) {
-    const { assesmentId, jawaban, nilai } = createJawabanDto;
-
-    // Convert assesmentId from string to number
-    const assesmentIdNumber = Number(assesmentId);
-    if (isNaN(assesmentIdNumber)) {
-      throw new Error('Invalid assesmentId');
-    }
-
-    // Cek apakah saat ini sebelum atau sama dengan deadline
-    const assesment =
-      await this.jawabanService.getAssesmentById(assesmentIdNumber);
-    const now = new Date();
-    if (assesment.deadline < now) {
-      throw new Error('The deadline has passed. You cannot upload the file.');
-    }
-
-    // Cegah siswa mengisi nilai, nilai harus tetap kosong
-    const userRole = req.user.role;
-    if (userRole === 'student' && nilai) {
-      throw new Error('Students cannot assign a value to the answer.');
-    }
-
-    // Set nilai ke null jika siswa mencoba mengisi nilai
-    createJawabanDto.nilai = null;
-
-    // Jika ada file, update path file
-    if (file) {
-      createJawabanDto.file = `${process.env.BASE_URL}/uploads/jawaban/${file.filename}`;
-    }
-
-    return this.jawabanService.createJawaban(
-      assesmentIdNumber,
-      jawaban,
-      createJawabanDto.nilai,
-      createJawabanDto.file,
+    const userId = req.user.id; // Assuming JWT payload contains user id
+    this.logger.log(`Creating Jawaban for user id: ${userId}`);
+    return await this.jawabanService.createJawaban(
+      createJawabanDto,
+      file,
+      userId,
     );
   }
 
-  // UPDATE Jawaban
+  // PUT Update Jawaban
   @Put(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Siswa)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: './uploads/jawaban',
+        destination: './uploads/file/jawaban',
         filename: (req, file, cb) => {
           const filename = `${uuidv4()}-${file.originalname}`;
           cb(null, filename);
         },
       }),
+      fileFilter: (req, file, cb) => {
+        if (file.fieldname === 'file') {
+          if (
+            file.mimetype !== 'application/pdf' &&
+            file.mimetype !== 'image/png' &&
+            file.mimetype !== 'image/jpeg'
+          ) {
+            return cb(
+              new Error(
+                'Only PDF, PNG, and JPEG files are allowed for Jawaban.',
+              ),
+              false,
+            );
+          }
+        }
+        cb(null, true); // accept the file
+      },
     }),
   )
   async updateJawaban(
-    @Req() req,
-    @Param('id') id: number,
+    @Param('id') id: string,
     @Body() updateJawabanDto: UpdateJawabanDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    const { assesmentId, jawaban, nilai } = updateJawabanDto;
-
-    // Convert assesmentId from string to number if it exists
-    let assesmentIdNumber: number | undefined;
-    if (assesmentId) {
-      assesmentIdNumber = Number(assesmentId);
+    const jawabanId = parseInt(id, 10);
+    if (isNaN(jawabanId)) {
+      throw new BadRequestException('ID must be a number');
     }
-
-    if (assesmentIdNumber && isNaN(assesmentIdNumber)) {
-      throw new Error('Invalid assesmentId');
-    }
-
-    // Cek apakah saat ini sebelum atau sama dengan deadline
-    const assesment =
-      await this.jawabanService.getAssesmentById(assesmentIdNumber);
-    const now = new Date();
-    if (assesment.deadline < now) {
-      throw new Error('The deadline has passed. You cannot update the file.');
-    }
-
-    // Cegah siswa mengubah nilai, nilai hanya bisa diubah oleh pengajar atau admin
-    const userRole = req.user.role;
-    if (userRole === 'student' && nilai) {
-      throw new Error('Students cannot assign a value to the answer.');
-    }
-
-    // Set nilai ke null jika siswa mencoba mengubah nilai
-    updateJawabanDto.nilai = null;
-
-    // Jika file baru diupload, hapus file lama dan simpan file baru
-    if (file) {
-      // Get existing jawaban data to find the old file
-      const jawaban = await this.jawabanService.getJawabanById(id);
-
-      if (jawaban && jawaban.file) {
-        const oldFilePath = path.join(
-          './uploads/jawaban',
-          path.basename(jawaban.file),
-        );
-        try {
-          fs.unlinkSync(oldFilePath); // Delete old file
-          console.log(`Deleted old file: ${oldFilePath}`);
-        } catch (error) {
-          console.error(`Error deleting old file: ${error.message}`);
-        }
-      }
-      updateJawabanDto.file = `${process.env.BASE_URL}/uploads/jawaban/${file.filename}`;
-    }
-
-    return this.jawabanService.updateJawaban(
-      id,
-      assesmentIdNumber,
-      jawaban,
-      updateJawabanDto.nilai,
-      updateJawabanDto.file,
+    this.logger.log(`Updating Jawaban by id: ${jawabanId}`);
+    return await this.jawabanService.updateJawaban(
+      jawabanId,
+      updateJawabanDto,
+      file,
     );
+  }
+
+  // DELETE Jawaban
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Siswa)
+  async deleteJawaban(@Param('id') id: string) {
+    const jawabanId = parseInt(id, 10);
+    if (isNaN(jawabanId)) {
+      throw new BadRequestException('ID must be a number');
+    }
+    this.logger.log(`Deleting Jawaban by id: ${jawabanId}`);
+    await this.jawabanService.deleteJawaban(jawabanId);
+    return { message: 'Jawaban deleted successfully.' };
+  }
+
+  @Get('assesment/:assesmentId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Siswa)
+  async getJawabanByAssesmentId(
+    @Param('assesmentId') assesmentId: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+    @Query('search') search: string = '',
+  ) {
+    const assesmentIdNumber = parseInt(assesmentId, 10);
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+
+    if (isNaN(assesmentIdNumber)) {
+      throw new BadRequestException('assesmentId harus berupa angka');
+    }
+    if (isNaN(pageNumber) || isNaN(limitNumber)) {
+      throw new BadRequestException('Page dan limit harus berupa angka');
+    }
+
+    this.logger.log(
+      `Mengambil Jawaban untuk assesment_id: ${assesmentIdNumber}`,
+    );
+
+    return this.jawabanService.getJawabanByAssesmentId(
+      assesmentIdNumber,
+      pageNumber,
+      limitNumber,
+      search,
+    );
+  }
+
+  @Patch(':jawabanId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Pengajar, Role.Admin)
+  async assignNilai(
+    @Param('jawabanId', ParseIntPipe) jawabanId: number,
+    @Body() assignNilaiDto: AssignNilaiDto,
+  ) {
+    this.logger.log(`Pengajar memberikan nilai kepada Jawaban ID ${jawabanId}`);
+    return this.jawabanService.assignNilai(jawabanId, assignNilaiDto);
   }
 }

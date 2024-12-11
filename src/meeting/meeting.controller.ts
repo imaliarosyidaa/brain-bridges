@@ -27,7 +27,6 @@ import path from 'path';
 import fs from 'fs';
 
 @Controller('api/meeting')
-@Controller('api/meeting')
 export class MeetingController {
   private readonly logger = new Logger(MeetingController.name);
 

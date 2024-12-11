@@ -85,6 +85,7 @@ model Meeting {
   file_materi1 String
   file_materi2 String?
   file_materi3 String?
+  summary      String?
 
   kelas        Class   @relation(fields: [kelas_id], references: [id])
 
