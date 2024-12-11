@@ -31,6 +31,7 @@ model User {
   pengajaran Class[]     @relation("PengajarClasses")
   kelas      Class[]     @relation("SiswaClasses")
   KelasSiswa KelasSiswa[]
+  diskusi      Diskusi[]     @relation("UserDiskusi")
 
   // Relasi dengan SiswaClasses
   SiswaClasses SiswaClasses[]
@@ -51,6 +52,7 @@ model Class {
   meetings    Meeting[]
   assesments  Assesment[]
   KelasSiswa  KelasSiswa[]
+  diskusi     Diskusi[]     @relation("ClassDiskusi")
 
   // Relasi dengan SiswaClasses
   SiswaClasses SiswaClasses[]
@@ -152,4 +154,20 @@ model SiswaClasses {
 
   @@id([A, B])
   @@map("SiswaClasses")
+}
+
+model Diskusi {
+  id         Int       @id @default(autoincrement())
+  kelas_id   Int
+  message    String
+  user_id    Int
+  comment_at DateTime  @default(now())
+  parent_id  Int?      
+
+  kelas      Class     @relation("ClassDiskusi", fields: [kelas_id], references: [id])
+  user       User      @relation("UserDiskusi", fields: [user_id], references: [id])
+  parent     Diskusi?  @relation("DiskusiReplies", fields: [parent_id], references: [id])
+  replies    Diskusi[] @relation("DiskusiReplies")
+
+  @@map("diskusi")
 }

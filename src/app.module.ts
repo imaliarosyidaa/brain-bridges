@@ -13,6 +13,7 @@ import { AssesmentModule } from './assesment/assesment.module';
 import { ProfileModule } from './profile/profile.module';
 import { JawabanModule } from './jawaban/jawaban.module';
 import { TopicModule } from './topic/topic.module';
+import { DiskusiModule } from './diskusi/diskusi.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { TopicModule } from './topic/topic.module';
     ProfileModule,
     JawabanModule,
     TopicModule,
+    DiskusiModule,
   ],
   controllers: [AppController],
   providers: [AppService],
