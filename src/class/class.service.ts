@@ -8,6 +8,7 @@ import { Prisma } from '@prisma/client';
 import { UpdateClassDto } from './dto/update-class.dto';
 import { LeaveKelasSiswaDto } from './dto/leave.dto';
 import { JoinKelasSiswaDto } from './dto/join.dto';
+import { AnggotaDto } from './dto/anggota.dto';
 
 @Injectable()
 export class ClassService {
@@ -237,5 +238,40 @@ export class ClassService {
         id: existingRecord.id,
       },
     });
+  }
+
+  async getSiswaByKelasId(kelasId: number): Promise<AnggotaDto[]> {
+    // Cek apakah kelas dengan kelasId ada
+    const kelasExist = await this.prisma.class.findUnique({
+      where: { id: kelasId },
+    });
+
+    if (!kelasExist) {
+      throw new NotFoundException(
+        `Kelas dengan ID ${kelasId} tidak ditemukan.`,
+      );
+    }
+
+    // Ambil siswa dari kelas_siswa berdasarkan kelasId
+    const siswa = await this.prisma.kelasSiswa.findMany({
+      where: { kelas_id: kelasId },
+      include: {
+        siswa: {
+          select: {
+            first_name: true,
+            last_name: true,
+            email: true,
+            photo: true,
+          },
+        },
+      },
+    });
+
+    // Map data ke UserDto
+    return siswa.map((entry) => ({
+      name: entry.siswa.first_name + ' ' + entry.siswa.last_name,
+      email: entry.siswa.email,
+      foto: entry.siswa.photo,
+    }));
   }
 }

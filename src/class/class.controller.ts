@@ -11,6 +11,7 @@ import {
   Request,
   Put,
   Req,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ClassService } from './class.service';
 import { CreateClassDto } from './dto/create-class.dto';
@@ -19,6 +20,7 @@ import { RolesGuard } from 'src/auth/guards/roles.guard'; // Guard untuk mengece
 import { Roles } from 'src/auth/decorator/roles.decorator'; // Decorator untuk menentukan role yang diperlukan
 import { Role } from '../auth/enum/role.enum';
 import { UpdateClassDto } from './dto/update-class.dto';
+import { AnggotaDto } from './dto/anggota.dto';
 
 @Controller('api/')
 export class ClassController {
@@ -89,5 +91,12 @@ export class ClassController {
   async leaveClass(@Req() req, @Param('kelasId') kelasId: string) {
     const userEmail = req.user.email; // Ambil email dari request user yang sudah terautentikasi
     return await this.classService.leaveClass(userEmail, kelasId);
+  }
+
+  @Get('class/:kelasId/anggota')
+  async getSiswaByKelasId(
+    @Param('kelasId', ParseIntPipe) kelasId: number,
+  ): Promise<AnggotaDto[]> {
+    return this.classService.getSiswaByKelasId(kelasId);
   }
 }
