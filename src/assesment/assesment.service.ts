@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateAssesmentDto } from './dto/create-assesment.dto';
 import { parseISO } from 'date-fns';
@@ -60,8 +64,22 @@ export class AssesmentService {
   }
 
   async getAssesmentByClassId(id: string) {
+    const kelasId = Number(id);
+
+    if (isNaN(kelasId)) {
+      throw new BadRequestException('Invalid class ID format.');
+    }
+
     const assessments = await this.prisma.assesment.findMany({
-      where: { kelas_id: Number(id) }, // Mengonversi id menjadi number
+      where: { kelas_id: kelasId },
+      include: {
+        kelas: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
 
     if (!assessments || assessments.length === 0) {
