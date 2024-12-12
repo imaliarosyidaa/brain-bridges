@@ -65,7 +65,7 @@ export class MeetingService {
     // Ensure required files are uploaded
     if (!createMeetingDto.vidio1 || !createMeetingDto.file_materi1) {
       this.logger.error('Missing required files: vidio1 or file_materi1');
-      throw new ForbiddenException('Vidio1 dan file_materi1 wajib diunggah.');
+      throw new ForbiddenException('Minimal 1 vidio dan 1 materi diunggah.');
     }
 
     // Log the data that will be saved to the database
@@ -113,6 +113,7 @@ export class MeetingService {
   async getMeetingById(id: number) {
     return this.prisma.meeting.findUnique({
       where: { id },
+      include: { kelas: true },
     });
   }
 

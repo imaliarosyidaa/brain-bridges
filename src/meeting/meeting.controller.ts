@@ -267,4 +267,16 @@ export class MeetingController {
 
     return { message: 'Meeting and associated files deleted successfully.' };
   }
+
+  @Get('/id/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Admin, Role.Pengajar)
+  async getMeetingById(@Param('id') id: number) {
+    const meetingId = Number(id);
+    const meeting = await this.meetingService.getMeetingById(meetingId);
+    if (!meeting) {
+      throw new Error('Meeting not found');
+    }
+    return meeting;
+  }
 }
