@@ -1,14 +1,12 @@
 // src/book/book.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBookDto } from './dto/create-book.dto';
-import { Prisma } from '@prisma/client'; // Import Prisma, no need for BookWhereInput
-
+import { Prisma } from '@prisma/client';
 @Injectable()
 export class BookService {
   constructor(private readonly prisma: PrismaService) {}
-
-  // GET all books with pagination and search
+  private readonly logger = new Logger(BookService.name);
   // GET all books with pagination and search
   async getAllBooks(page: number = 1, limit: number = 10, search: string = '') {
     // Jika search kosong atau null, kita tidak memberikan filter

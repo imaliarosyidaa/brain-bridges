@@ -274,4 +274,44 @@ export class ClassService {
       foto: entry.siswa.photo,
     }));
   }
+
+  // Delete user from class
+  async deleteMemberByClass(userEmail: string, kelasId: number) {
+    // Validasi email
+    console.log(userEmail);
+    if (!userEmail) {
+      throw new Error('Email tidak valid');
+    }
+
+    // Cari user berdasarkan email
+    const user = await this.prisma.user.findUnique({
+      where: { email: userEmail },
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Convert kelasId ke number
+    const kelasIdNumber = Number(kelasId);
+
+    // Cek apakah user terdaftar di kelas ini
+    const existingRecord = await this.prisma.kelasSiswa.findFirst({
+      where: {
+        user_id: user.id,
+        kelas_id: kelasIdNumber,
+      },
+    });
+
+    if (!existingRecord) {
+      throw new Error('User is not enrolled in this class');
+    }
+
+    // Hapus anggota dari kelas
+    return this.prisma.kelasSiswa.delete({
+      where: {
+        id: existingRecord.id,
+      },
+    });
+  }
 }

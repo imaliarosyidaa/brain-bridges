@@ -109,7 +109,7 @@ export class AssesmentController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin, Role.Pengajar)
+  @Roles(Role.Admin, Role.Pengajar, Role.Siswa)
   async getAssesmentById(@Param('id') id: string) {
     try {
       const assesment = await this.assesmentService.getAssesmentById(id);
@@ -125,7 +125,7 @@ export class AssesmentController {
 
   @Get('class/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin, Role.Pengajar)
+  @Roles(Role.Admin, Role.Pengajar, Role.Siswa)
   async getAssesmentByClassId(@Param('id') id: string) {
     try {
       const assesment = await this.assesmentService.getAssesmentByClassId(id);
