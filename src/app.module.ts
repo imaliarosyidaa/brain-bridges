@@ -14,6 +14,7 @@ import { ProfileModule } from './profile/profile.module';
 import { JawabanModule } from './jawaban/jawaban.module';
 import { TopicModule } from './topic/topic.module';
 import { DiskusiModule } from './diskusi/diskusi.module';
+import { KelasSiswaModule } from './kelas_siswa/kelassiswa.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { DiskusiModule } from './diskusi/diskusi.module';
     JawabanModule,
     TopicModule,
     DiskusiModule,
+    KelasSiswaModule,
   ],
   controllers: [AppController],
   providers: [AppService],
