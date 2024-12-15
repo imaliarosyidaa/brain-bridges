@@ -22,8 +22,9 @@ import { KelasSiswaModule } from './kelas_siswa/kelassiswa.module';
     BookModule,
     PrismaModule,
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', '..', 'uploads'), // Mengarah ke folder uploads yang ada di luar dist
-      serveRoot: '/uploads', // URL yang bisa diakses
+      rootPath: join(process.cwd(), 'uploads'), // Menyajikan dari uploads di root proyek
+      serveRoot: '/uploads', // Prefix URL untuk mengakses file
+      exclude: ['/api*'], // Mengecualikan rute API dari penyajian statis
     }),
     UserModule,
     ClassModule,

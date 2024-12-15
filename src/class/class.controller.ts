@@ -21,6 +21,7 @@ import { Roles } from 'src/auth/decorator/roles.decorator'; // Decorator untuk m
 import { Role } from '../auth/enum/role.enum';
 import { UpdateClassDto } from './dto/update-class.dto';
 import { AnggotaDto } from './dto/anggota.dto';
+import { DeleteClassMemberDto } from './dto/deleteClassMember.dto';
 
 @Controller('api/')
 export class ClassController {
@@ -80,6 +81,7 @@ export class ClassController {
 
   @Post('class/join/:kelasId')
   @UseGuards(JwtAuthGuard)
+  @Roles(Role.Admin, Role.Pengajar, Role.Siswa)
   async joinClass(@Req() req, @Param('kelasId') kelasId: string) {
     const userEmail = req.user.email; // Ambil email dari request user yang sudah terautentikasi
     return await this.classService.joinClass(userEmail, kelasId);
@@ -88,15 +90,41 @@ export class ClassController {
   // Endpoint untuk leave class
   @Delete('class/leave/:kelasId')
   @UseGuards(JwtAuthGuard)
+  @Roles(Role.Admin, Role.Pengajar, Role.Siswa)
   async leaveClass(@Req() req, @Param('kelasId') kelasId: string) {
     const userEmail = req.user.email; // Ambil email dari request user yang sudah terautentikasi
     return await this.classService.leaveClass(userEmail, kelasId);
   }
 
   @Get('class/:kelasId/anggota')
+  @UseGuards(JwtAuthGuard)
+  @Roles(Role.Admin, Role.Pengajar, Role.Siswa)
   async getSiswaByKelasId(
     @Param('kelasId', ParseIntPipe) kelasId: number,
   ): Promise<AnggotaDto[]> {
     return this.classService.getSiswaByKelasId(kelasId);
+  }
+
+  @Delete('/class/anggota/remove')
+  @UseGuards(JwtAuthGuard)
+  @Roles(Role.Admin, Role.Pengajar)
+  async deleteClassMember(
+    @Body() deleteClassMemberDto: DeleteClassMemberDto, // Mengambil body menggunakan DTO
+  ) {
+    const { userEmail, kelasId } = deleteClassMemberDto; // Mendapatkan data dari DTO
+
+    try {
+      const result = await this.classService.deleteMemberByClass(
+        userEmail, // Menggunakan email yang sesuai dengan body request
+        kelasId, // Menggunakan kelas_id yang sesuai dengan body request
+      );
+
+      return {
+        message: 'Siswa berhasil dihapus dari kelas',
+        data: result,
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 }

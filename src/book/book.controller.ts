@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Body,
   Controller,
@@ -7,10 +8,12 @@ import {
   Param,
   Post,
   Put,
+  Res,
   Query,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
+  NotFoundException,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -23,6 +26,8 @@ import { CreateBookDto } from './dto/create-book.dto';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
 import * as path from 'path';
+import { Response } from 'express';
+import { access } from 'fs/promises';
 
 @Controller('api/books')
 export class BookController {
@@ -278,5 +283,96 @@ export class BookController {
     await this.bookService.deleteBook(bookId);
 
     return { message: 'Book and associated files deleted successfully.' };
+  }
+
+  @Get(':id/preview')
+  @UseGuards(JwtAuthGuard) // If using authentication
+  async previewBookFile(@Param('id') id: number, @Res() res: Response) {
+    const book = await this.bookService.getBookById(Number(id));
+    if (!book || !book.file) {
+      throw new NotFoundException('File not found');
+    }
+
+    // Extract relative path from URL stored in the database
+    const relativeFilePath = this.extractRelativePath(book.file);
+    if (!relativeFilePath) {
+      // Assuming you have a logger
+      console.error(`Invalid file URL format: ${book.file}`);
+      throw new NotFoundException('Invalid file path');
+    }
+
+    // Decode URL to handle special characters
+    const decodedPath = decodeURIComponent(relativeFilePath);
+
+    // Build absolute path
+    const absolutePath = path.resolve(process.cwd(), 'uploads', decodedPath);
+
+    try {
+      // Check if file exists and is readable
+      await access(absolutePath, fs.constants.R_OK);
+    } catch (err) {
+      console.error(`File not accessible: ${absolutePath}`, err);
+      throw new NotFoundException('File not found on server');
+    }
+
+    // Get the correct file name
+    const fileName = path.basename(decodedPath);
+
+    // Set headers for PDF preview (handled globally)
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
+
+    // Stream the file for efficiency
+    const fileStream = fs.createReadStream(absolutePath);
+
+    fileStream.on('error', (error) => {
+      console.error(`Error reading file: ${error.message}`, error);
+      if (!res.headersSent) {
+        res.status(500).send('Error sending file');
+      }
+    });
+
+    fileStream.pipe(res);
+  }
+
+  /**
+   * Helper function to extract the relative path from URL
+   * @param fileUrl Complete URL of the file
+   * @returns Relative path after 'uploads/' or 'uploads\'
+   */
+  private extractRelativePath(fileUrl: string): string | null {
+    try {
+      // Replace backslashes with forward slashes for consistency
+      const normalizedUrl = fileUrl.replace(/\\/g, '/');
+
+      // Attempt to parse as a URL
+      let urlPath: string;
+
+      try {
+        const url = new URL(normalizedUrl);
+        urlPath = url.pathname;
+      } catch (e) {
+        // If parsing fails, assume it's a path with forward slashes
+        urlPath = normalizedUrl;
+      }
+
+      // Find the index of 'uploads' in the path
+      const uploadsIndex = urlPath.toLowerCase().indexOf('/uploads/');
+      if (uploadsIndex === -1) {
+        return null;
+      }
+
+      // Extract substring after '/uploads/'
+      const relativePath = urlPath.substring(uploadsIndex + '/uploads/'.length);
+
+      // Normalize path according to the operating system
+      return relativePath.replace(/\//g, path.sep);
+    } catch (error) {
+      console.error(
+        `Error extracting relative path from URL: ${fileUrl}`,
+        error,
+      );
+      return null;
+    }
   }
 }
