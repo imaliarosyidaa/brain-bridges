@@ -66,26 +66,30 @@ export class JawabanService {
     return jawaban;
   }
 
-  // Create Jawaban
   async createJawaban(
     createJawabanDto: CreateJawabanDto,
     file?: Express.Multer.File,
-    userId?: number,
-  ) {
-    const data: any = {
-      assesment_id: Number(createJawabanDto.assesmentId),
-      jawaban: createJawabanDto.jawaban,
-      user_id: userId, // Assuming you have a user_id field in Jawaban
-    };
+    userId?: number) {
+    try {
+      const data: any = {
+        assesment_id: Number(createJawabanDto.assesmentId),
+        jawaban: createJawabanDto.jawaban || null, // Set null jika tidak ada jawaban
+        siswa_id: Number(createJawabanDto.siswaId),
+      };
 
-    if (file) {
-      const baseUrl = process.env.BASE_URL;
-      data.file = `${baseUrl}/uploads/file/jawaban/${file.filename}`;
+      if (file) {
+        const baseUrl = process.env.BASE_URL;
+        if (!baseUrl) {
+          throw new Error('BASE_URL environment variable is not defined');
+        }
+        data.file = `${baseUrl}/uploads/file/jawaban/${file.filename}`;
+      }
+      console.log('Data being sent to Prisma:', data);
+      return await this.prisma.jawaban.create({ data });
+    } catch (error) {
+      console.error('Error creating Jawaban:', error);
+      throw new Error('Failed to create Jawaban');
     }
-
-    return this.prisma.jawaban.create({
-      data,
-    });
   }
 
   // Update Jawaban
@@ -147,6 +151,48 @@ export class JawabanService {
   }
 
   async getJawabanByAssesmentId(
+    assesmentId: number,
+    page: number = 1,
+    limit: number = 10,
+    search: string = '',
+  ) {
+    const skip = (page - 1) * limit;
+
+    const [total, jawaban] = await Promise.all([
+      this.prisma.jawaban.count({
+        where: {
+          assesment_id: assesmentId,
+          jawaban: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+      }),
+      this.prisma.jawaban.findMany({
+        where: {
+          assesment_id: assesmentId,
+          jawaban: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+        skip,
+        take: limit,
+        include: {
+          assesments: true,
+        },
+      }),
+    ]);
+
+    return {
+      total,
+      page,
+      limit,
+      data: jawaban,
+    };
+  }
+
+  async getJawabanBySiswaId(
     assesmentId: number,
     page: number = 1,
     limit: number = 10,

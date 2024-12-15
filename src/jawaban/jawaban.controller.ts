@@ -67,6 +67,19 @@ export class JawabanController {
     return await this.jawabanService.getJawabanById(jawabanId);
   }
 
+  // GET Jawaban by ID
+  @Get('siswa/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Siswa, Role.Pengajar, Role.Admin)
+  async getJawabanBySiswaId(@Param('id') id: string) {
+    const siswaId = parseInt(id, 10);
+    if (isNaN(siswaId)) {
+      throw new BadRequestException('ID must be a number');
+    }
+    this.logger.log(`Getting Jawaban by Siswa id: ${siswaId}`);
+    return await this.jawabanService.getJawabanBySiswaId(siswaId);
+  }
+
   // POST Create Jawaban
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -178,7 +191,7 @@ export class JawabanController {
 
   @Get('assesment/:assesmentId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Siswa)
+  @Roles(Role.Siswa, Role.Admin, Role.Pengajar)
   async getJawabanByAssesmentId(
     @Param('assesmentId') assesmentId: string,
     @Query('page') page: string = '1',

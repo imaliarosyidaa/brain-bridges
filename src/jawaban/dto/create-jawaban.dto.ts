@@ -4,6 +4,9 @@ export class CreateJawabanDto {
   @IsNotEmpty() // Menerima asesmentId dalam bentuk string
   assesmentId: string;
 
+  @IsNotEmpty()
+  siswaId: string;
+
   @IsString()
   @IsOptional()
   jawaban?: string;

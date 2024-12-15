@@ -32,7 +32,7 @@ export class TopicController {
   // Get all topics (Admin only)
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Pengajar)
   async getAllTopics() {
     return this.topicService.getAllTopics();
   }
@@ -40,7 +40,7 @@ export class TopicController {
   // Get Topic by ID (Admin only)
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.Pengajar)
   async getTopicById(@Param('id') id: number) {
     const topicId = Number(id);
     return this.topicService.getTopicById(topicId);

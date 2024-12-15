@@ -136,6 +136,7 @@ model Book {
 model Jawaban {
   id           Int     @id @default(autoincrement())
   assesment_id Int
+  siswa_id     Int
   jawaban      String?
   file         String?
   nilai        Int?
