@@ -43,6 +43,7 @@ model User {
 model Class {
   id          Int      @id @default(autoincrement())
   name        String   @unique
+  description        String
   pengajar_id Int?
   topic_id    Int
   pengajar    User?    @relation("PengajarClasses", fields: [pengajar_id], references: [id])

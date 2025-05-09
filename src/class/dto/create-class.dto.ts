@@ -6,6 +6,10 @@ export class CreateClassDto {
   name: string;
 
   @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
   @IsInt()
   @Min(1)
   pengajar_id?: number;

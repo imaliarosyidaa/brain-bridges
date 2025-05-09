@@ -62,8 +62,8 @@ export class MeetingController {
         }),
         fileFilter: (req, file, cb) => {
           // Validasi file berdasarkan ekstensi dan MIME type
-          const videoMimeTypes = ['video/mp4', 'video/mkv', 'video/avi'];
-          const fileMimeTypes = ['application/pdf'];
+          const videoMimeTypes = ['video/mp4', 'video/mkv', 'video/avi', 'video/mov'];
+          const fileMimeTypes = ['application/pdf', 'application/docx'];
 
           if (
             (file.fieldname.includes('vidio') &&
@@ -188,8 +188,8 @@ export class MeetingController {
           },
         }),
         fileFilter: (req, file, cb) => {
-          const videoMimeTypes = ['video/mp4', 'video/mkv', 'video/avi'];
-          const fileMimeTypes = ['application/pdf'];
+          const videoMimeTypes = ['video/mp4', 'video/mkv', 'video/avi', 'video/mov'];
+          const fileMimeTypes = ['application/pdf', 'application/docx'];
 
           if (
             (file.fieldname.includes('vidio') &&

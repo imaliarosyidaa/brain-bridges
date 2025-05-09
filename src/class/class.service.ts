@@ -16,7 +16,7 @@ export class ClassService {
 
   // Create Class (Admin only)
   async createClass(createClassDto: CreateClassDto, userEmail: string) {
-    const { name, pengajar_id, topic_id } = createClassDto;
+    const { name, description, pengajar_id, topic_id } = createClassDto;
     console.log('Creating class with data:', createClassDto);
 
     // Ensure topic exists
@@ -60,6 +60,7 @@ export class ClassService {
       const newClass = await this.prisma.class.create({
         data: {
           name,
+          description,
           pengajar_id: resolvedPengajarId,
           topic_id,
         },
@@ -77,6 +78,24 @@ export class ClassService {
   async getClassById(id: number) {
     const classData = await this.prisma.class.findUnique({
       where: { id },
+      include: {
+        pengajar: true,
+        topic: true,
+        siswa: true,
+      },
+    });
+
+    if (!classData) {
+      throw new NotFoundException('Class not found');
+    }
+
+    return classData;
+  }
+
+  // Get Class by ID (Pengajar)
+  async getClassByPengajarId(id: number) {
+    const classData = await this.prisma.class.findMany({
+      where: { pengajar_id: id },
       include: {
         pengajar: true,
         topic: true,

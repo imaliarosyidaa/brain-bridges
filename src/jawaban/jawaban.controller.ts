@@ -57,7 +57,7 @@ export class JawabanController {
   // GET Jawaban by ID
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Siswa)
+  @Roles(Role.Siswa, Role.Pengajar, Role.Admin)
   async getJawabanById(@Param('id') id: string) {
     const jawabanId = parseInt(id, 10);
     if (isNaN(jawabanId)) {

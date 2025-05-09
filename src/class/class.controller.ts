@@ -62,6 +62,14 @@ export class ClassController {
     return this.classService.getClassById(kelasId);
   }
 
+  @Get('class/pengajar/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.Pengajar) // Admin, Pengajar, dan Siswa dapat mengakses
+  async getClassByPengajarId(@Param('id') id: number) {
+    const pengajarId = Number(id);
+    return this.classService.getClassByPengajarId(pengajarId);
+  }
+
   // Get All Classes with Search (Siswa, Pengajar, Admin)
   @Get('class')
   @UseGuards(JwtAuthGuard, RolesGuard)

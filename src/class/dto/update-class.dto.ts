@@ -8,6 +8,10 @@ export class UpdateClassDto {
 
   @IsOptional()
   @IsInt()
+  description?: string;
+
+  @IsOptional()
+  @IsInt()
   @Min(1)
   pengajar_id?: number;
 
