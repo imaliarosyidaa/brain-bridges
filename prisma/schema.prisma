@@ -77,16 +77,8 @@ model Meeting {
   kelas_id     Int
   tittle       String
   description  String
-  vidio1       String
-  title_vid1   String
-  vidio2       String?
-  title_vid2   String?
-  vidio3       String?
-  title_vid3   String?
-  file_materi1 String
-  file_materi2 String?
-  file_materi3 String?
-  summary      String?
+  videos       String
+  files   String
 
   kelas        Class   @relation(fields: [kelas_id], references: [id])
 

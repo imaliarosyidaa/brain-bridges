@@ -62,12 +62,6 @@ export class MeetingService {
       throw new ForbiddenException('Anda tidak memiliki akses.');
     }
 
-    // Ensure required files are uploaded
-    if (!createMeetingDto.vidio1 || !createMeetingDto.file_materi1) {
-      this.logger.error('Missing required files: vidio1 or file_materi1');
-      throw new ForbiddenException('Minimal 1 vidio dan 1 materi diunggah.');
-    }
-
     // Log the data that will be saved to the database
     this.logger.log('Saving meeting data to database...');
 
@@ -75,15 +69,8 @@ export class MeetingService {
       data: {
         tittle: meetingData.tittle,
         description: meetingData.description,
-        vidio1: createMeetingDto.vidio1,
-        file_materi1: createMeetingDto.file_materi1,
-        vidio2: createMeetingDto.vidio2,
-        file_materi2: createMeetingDto.file_materi2,
-        vidio3: createMeetingDto.vidio3,
-        file_materi3: createMeetingDto.file_materi3,
-        title_vid1: createMeetingDto.title_vid1,
-        title_vid2: createMeetingDto.title_vid2,
-        title_vid3: createMeetingDto.title_vid3,
+        videos:meetingData.videos,
+        files:meetingData.files,
         kelas: { connect: { id: kelasIdInt } },
       },
     });

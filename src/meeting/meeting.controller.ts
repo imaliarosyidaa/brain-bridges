@@ -80,22 +80,10 @@ export class MeetingController {
   )
   async createMeeting(
     @Body() createMeetingDto: CreateMeetingDto,
-    @UploadedFiles()
-    files: {
-      vidio1?: Express.Multer.File[];
-      file_materi1?: Express.Multer.File[];
-      vidio2?: Express.Multer.File[];
-      file_materi2?: Express.Multer.File[];
-      vidio3?: Express.Multer.File[];
-      file_materi3?: Express.Multer.File[];
-    },
     @Req() req: any,
   ) {
     this.logger.log('Incoming request for creating a meeting');
     this.logger.log('Received CreateMeetingDto: ', createMeetingDto);
-    this.logger.log('Files received: ', files);
-
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
     const user = req.user;
 
     // Log kelasId and ensure it's an integer
@@ -104,38 +92,6 @@ export class MeetingController {
     if (isNaN(kelasId)) {
       this.logger.error('Invalid kelasId: Should be an integer');
       throw new BadRequestException('KelasId harus berupa angka.');
-    }
-
-    // Update CreateMeetingDto dengan URL yang benar
-    if (files.vidio1?.length > 0) {
-      this.logger.log(`Processing vidio1: ${files.vidio1[0].originalname}`);
-      createMeetingDto.vidio1 = `${baseUrl}/uploads/materi/vidio/${files.vidio1[0].filename}`;
-    }
-    if (files.file_materi1?.length > 0) {
-      this.logger.log(
-        `Processing file_materi1: ${files.file_materi1[0].originalname}`,
-      );
-      createMeetingDto.file_materi1 = `${baseUrl}/uploads/materi/file/${files.file_materi1[0].filename}`;
-    }
-    if (files.vidio2?.length > 0) {
-      this.logger.log(`Processing vidio2: ${files.vidio2[0].originalname}`);
-      createMeetingDto.vidio2 = `${baseUrl}/uploads/materi/vidio/${files.vidio2[0].filename}`;
-    }
-    if (files.file_materi2?.length > 0) {
-      this.logger.log(
-        `Processing file_materi2: ${files.file_materi2[0].originalname}`,
-      );
-      createMeetingDto.file_materi2 = `${baseUrl}/uploads/materi/file/${files.file_materi2[0].filename}`;
-    }
-    if (files.vidio3?.length > 0) {
-      this.logger.log(`Processing vidio3: ${files.vidio3[0].originalname}`);
-      createMeetingDto.vidio3 = `${baseUrl}/uploads/materi/vidio/${files.vidio3[0].filename}`;
-    }
-    if (files.file_materi3?.length > 0) {
-      this.logger.log(
-        `Processing file_materi3: ${files.file_materi3[0].originalname}`,
-      );
-      createMeetingDto.file_materi3 = `${baseUrl}/uploads/materi/file/${files.file_materi3[0].filename}`;
     }
 
     // Log the final CreateMeetingDto before passing it to the service
