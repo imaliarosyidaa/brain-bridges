@@ -107,7 +107,6 @@ export class MeetingService {
   async updateMeeting(
     meetingId: number,
     updateMeetingDto: UpdateMeetingDto,
-    files: any,
   ) {
     this.logger.log(`Processing update for meeting ID: ${meetingId}`);
 
@@ -122,69 +121,6 @@ export class MeetingService {
       this.logger.error('Meeting not found!');
       throw new ForbiddenException('Meeting tidak ditemukan.');
     }
-
-    // Base URL untuk file
-    const baseUrl = 'http://localhost:3000';
-
-    // Function to handle file updates
-    const handleFileUpdate = (
-      existingFilePath: string | null,
-      file: any,
-      fieldName: string,
-    ) => {
-      if (file?.length > 0) {
-        this.logger.log(`Processing ${fieldName}: ${file[0].originalname}`);
-        // Hapus file lama jika ada
-        if (existingFilePath) {
-          const oldFilePath = resolve(
-            'uploads',
-            'materi',
-            fieldName.includes('vidio') ? 'vidio' : 'file',
-            existingFilePath.split('/uploads/materi/')[1],
-          );
-          try {
-            unlinkSync(oldFilePath); // Hapus file lama
-            this.logger.log(`Deleted old file: ${oldFilePath}`);
-          } catch (error) {
-            this.logger.error(`Failed to delete old file: ${error.message}`);
-          }
-        }
-        return `${baseUrl}/uploads/materi/${fieldName.includes('vidio') ? 'vidio' : 'file'}/${file[0].filename}`;
-      }
-      return existingFilePath; // Tidak ada perubahan file, kembalikan yang lama
-    };
-
-    // Handle each file update
-    meetingData.vidio1 = handleFileUpdate(
-      existingMeeting.vidio1,
-      files.vidio1,
-      'vidio1',
-    );
-    meetingData.vidio2 = handleFileUpdate(
-      existingMeeting.vidio2,
-      files.vidio2,
-      'vidio2',
-    );
-    meetingData.vidio3 = handleFileUpdate(
-      existingMeeting.vidio3,
-      files.vidio3,
-      'vidio3',
-    );
-    meetingData.file_materi1 = handleFileUpdate(
-      existingMeeting.file_materi1,
-      files.file_materi1,
-      'file_materi1',
-    );
-    meetingData.file_materi2 = handleFileUpdate(
-      existingMeeting.file_materi2,
-      files.file_materi2,
-      'file_materi2',
-    );
-    meetingData.file_materi3 = handleFileUpdate(
-      existingMeeting.file_materi3,
-      files.file_materi3,
-      'file_materi3',
-    );
 
     // Update data meeting di database
     const updatedMeeting = await this.prisma.meeting.update({
