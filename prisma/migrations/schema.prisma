@@ -68,8 +68,8 @@
     kelas_id     Int
     tittle       String
     description  String
-    videos       String
-    files   String
+    videos       String[]
+    files   String[]
 
     kelas        Class   @relation(fields: [kelas_id], references: [id])
 
