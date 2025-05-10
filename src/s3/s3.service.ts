@@ -14,7 +14,8 @@ export class S3Service {
   });
 
   async getPresignedUrl(fileName: string, fileType: string, type: string) {
-    const key = `${type}/${uuidv4()}-${fileName}`;
+    const encodedFileName = encodeURIComponent(fileName);
+    const key = `${type}/${uuidv4()}-${encodedFileName}`;
     const command = new PutObjectCommand({
       Bucket: process.env.AWS_BUCKET_NAME,
       Key: key,
