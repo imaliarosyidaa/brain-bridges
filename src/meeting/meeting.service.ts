@@ -64,6 +64,7 @@ export class MeetingService {
 
     // Log the data that will be saved to the database
     this.logger.log('Saving meeting data to database...');
+  
 
     const meeting = await this.prisma.meeting.create({
       data: {
