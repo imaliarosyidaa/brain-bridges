@@ -12,8 +12,11 @@ export class CreateMeetingDto {
   @IsString()
   description?: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
-  videos?: string[];
-  files?: string[];
+  videos: string;
+
+  @IsNotEmpty()
+  @IsString()
+  files: string;
 }
