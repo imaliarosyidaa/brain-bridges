@@ -21,7 +21,7 @@ export class S3Service {
       ContentType: fileType,
     });
 
-    const url = await getSignedUrl(this.s3, command, { expiresIn: 60 * 5 });
+    const url = await getSignedUrl(this.s3, command, { expiresIn: 180 * 5 });
     return { url, key };
   }
 }
