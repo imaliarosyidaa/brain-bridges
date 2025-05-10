@@ -1,4 +1,4 @@
-import { Controller, Put, Body, UseGuards} from '@nestjs/common';
+import { Controller, Post, Body, UseGuards} from '@nestjs/common';
 import { S3Service } from './s3.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -9,7 +9,7 @@ import { Role } from 'src/auth/enum/role.enum';
 export class S3Controller {
   constructor(private readonly s3Service: S3Service) {}
 
-  @Put('upload-url')
+  @Post('upload-url')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.Admin, Role.Pengajar)
   async getUploadUrl(@Body() body: { fileName: string; fileType: string; type: string }) {
