@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { S3Controller } from './s3/s3.controller';
+import { S3Service } from './s3/s3.service';
 import { AuthModule } from './auth/auth.module';
 import { BookModule } from './book/book.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -36,7 +38,7 @@ import { KelasSiswaModule } from './kelas_siswa/kelassiswa.module';
     DiskusiModule,
     KelasSiswaModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, S3Controller],
+  providers: [AppService, S3Service],
 })
 export class AppModule {}
