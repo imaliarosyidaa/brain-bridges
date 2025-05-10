@@ -70,6 +70,7 @@ export class MeetingService {
       data: {
         tittle: meetingData.tittle,
         description: meetingData.description,
+        videos:meetingData.videos,
         files:meetingData.files,
         kelas: { connect: { id: kelasIdInt } },
       },
