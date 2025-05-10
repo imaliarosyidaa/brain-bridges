@@ -62,19 +62,18 @@
     @@map("topics")
     }
 
-    // Define model for Meeting
-    model Meeting {
-    id           Int     @id @default(autoincrement())
-    kelas_id     Int
-    tittle       String
-    description  String
-    videos       String
-    files   String
+   model Meeting {
+  id           Int     @id @default(autoincrement())
+  kelas_id     Int
+  tittle       String
+  description  String
+  videos       String[]  
+  files        String[] 
 
-    kelas        Class   @relation(fields: [kelas_id], references: [id])
+  kelas        Class   @relation(fields: [kelas_id], references: [id])
 
-    @@map("meetings")
-    }
+  @@map("meetings")
+}
 
     // Define model for KelasSiswa
     model KelasSiswa {
