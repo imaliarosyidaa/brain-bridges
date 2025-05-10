@@ -13,7 +13,7 @@ export class MeetingService {
 
   constructor(private prisma: PrismaService) {}
 
-  async createMeeting(createMeetingDto: CreateMeetingDto, user: any) {
+  async createMeeting(createMeetingDto: CreateMeetingDto, user: any): Promise<Meeting> {
     this.logger.log('Processing meeting creation...');
 
     const { kelasId, ...meetingData } = createMeetingDto;
@@ -63,14 +63,15 @@ export class MeetingService {
     }
 
     // Log the data that will be saved to the database
-    this.logger.log('Saving meeting data to database...');
-  
+    this.logger.log('Saving meeting data to database...', meetingData);
 
+    // Create the meeting record
     const meeting = await this.prisma.meeting.create({
       data: {
-        tittle: meetingData.tittle,
-        description: meetingData.description,
-        kelas: { connect: { id: kelasIdInt } },
+        kelas: {
+          connect: { id: kelasIdInt },
+        },
+        ...meetingData, // Ini akan memasukkan semua properti dari meetingData, termasuk videos
       },
     });
 
