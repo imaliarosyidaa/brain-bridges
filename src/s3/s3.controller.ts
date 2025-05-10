@@ -6,7 +6,6 @@ import { Roles } from 'src/auth/decorator/roles.decorator';
 import { Role } from 'src/auth/enum/role.enum';
 
 @Controller('api/s3')
-@UseGuards(JwtAuthGuard)
 export class S3Controller {
   constructor(private readonly s3Service: S3Service) {}
 
