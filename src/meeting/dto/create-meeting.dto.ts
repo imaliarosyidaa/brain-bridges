@@ -14,6 +14,6 @@ export class CreateMeetingDto {
 
   @IsOptional()
   @IsString()
-  videos?: string;
-  files?: string;
+  videos?: string[];
+  files?: string[];
 }

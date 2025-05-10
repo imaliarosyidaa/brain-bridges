@@ -11,10 +11,10 @@ export class UpdateMeetingDto {
   kelasId?: string; // ID kelas yang terkait, jika kelas berubah
 
   @IsOptional()
-  videos?: string; // URL video 1, jika ada perubahan
+  videos?: string[]; // URL video 1, jika ada perubahan
 
   @IsOptional()
-  files?: string; // URL file materi 1, jika ada perubahan
+  files?: string[]; // URL file materi 1, jika ada perubahan
 
   @IsOptional()
   summary?: string;
