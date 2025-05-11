@@ -19,6 +19,7 @@ export class S3Service {
     const command = new PutObjectCommand({
       Bucket: process.env.AWS_BUCKET_NAME,
       Key: key,
+      ACL: 'public-read',
       ContentType: fileType,
     });
 
