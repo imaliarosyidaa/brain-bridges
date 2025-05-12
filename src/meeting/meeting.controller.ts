@@ -105,7 +105,7 @@ export class MeetingController {
 
   @Get('/id/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.Admin, Role.Pengajar)
+  @Roles(Role.Admin, Role.Pengajar, Role.Siswa)
   async getMeetingById(@Param('id') id: number) {
     const meetingId = Number(id);
     const meeting = await this.meetingService.getMeetingById(meetingId);
